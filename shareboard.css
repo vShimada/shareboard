@@ -1,1 +1,24 @@
 /* CSS declarations go here */
+body {  
+    text-align: center;  
+}  
+div#wrapper {  
+    width: 800px;  
+    margin: 0 auto;  
+    text-align: left;  
+}   
+.box{
+  background-image:-moz-linear-gradient(top, #02e84e, #017f2b);
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#02e84e), to(#017f2b), color-stop(1,#017f2b));
+}
+.fourcorners{
+  -moz-border-radius: 20px;
+  -webkit-border-radius: 20px;
+  -khtml-border-radius: 20px;	
+  border-radius: 20px;
+}
+#canvas {
+    width: 800px;  
+    height: 600px;
+    margin: 0 auto;  		  
+}
