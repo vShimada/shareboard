@@ -4,11 +4,16 @@ if (Meteor.is_client) {
   
   Template.canvas.events = {
 
-   	'mousemove canvas' : function () {
-		console.log('canvas_mousemove'+Draw+event.pageX+":"+event.pageY);
+   	'mousemove canvas' : function (ev) {
+
+		if (!ev){
+			ev = event;
+		}
+
+		////console/log('canvas_mousemove'+Draw+event.pageX+":"+event.pageY);
 		//todo loadの書き方がわからない
 		if (this.load !== true) {
-			console.log('canvas_new');			
+			//console/log('canvas_new');			
 			this.canvas = document.getElementById("canvas");
 			this.canvas.width = 800;
 			this.canvas.height = 600;
@@ -17,8 +22,8 @@ if (Meteor.is_client) {
 			this.load = true;
 		}
 									
-		this.endX = event.pageX - this.rect.left;
-		this.endY = event.pageY - this.rect.top;
+		this.endX = ev.pageX - this.rect.left;
+		this.endY = ev.pageY - this.rect.top;
 		
 		if(Draw){
 			this.context.beginPath();
@@ -31,11 +36,11 @@ if (Meteor.is_client) {
 		this.startY = this.endY; 
 	  },
       'mouseup canvas' : function () {
-          console.log("canvas mouseup");
+          //console/log("canvas mouseup");
 	      Draw=false;
 	  },
       'mousedown canvas' : function () {
-          console.log("canvas mousedown");
+          //console/log("canvas mousedown");
 		  Draw=true;
 	  },
   } ;
