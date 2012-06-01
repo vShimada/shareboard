@@ -1,18 +1,25 @@
 <head>
   <title>shareboard</title>
-
-
 </head>
 
 <body>
-	<div id="wrapper"> 
-		{{> canvas}}
-	</div>
+    <div id="wrapper"> 
+            {{> draw}}
+            {{> control}}
+    </div>
 </body>
 
 
-<template name="canvas">
-	<div id="canvas_area">
-		<canvas id="canvas" class="box fourcorners"></canvas>
-	</div>
+<template name="draw">
+  <div class="title">draw</div>
+  <div id="draw">
+      <canvas id="canvas" class="box fourcorners"></canvas>
+    </div>
+</template>
+
+<template name="control">
+  <div class="title">contorl</div>
+  <div class="control">
+      <button id="reset">reset</button>
+  </div>
 </template>
