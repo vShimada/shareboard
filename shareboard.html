@@ -1,25 +1,17 @@
 <head>
   <title>shareboard</title>
+  <meta name = "viewport" content = "initial-scale = 1.0, user-scalable = no" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
 </head>
 
 <body>
     <div id="wrapper"> 
             {{> draw}}
-            {{> control}}
     </div>
 </body>
-
-
 <template name="draw">
-  <div class="title">draw</div>
   <div id="draw">
       <canvas id="canvas" class="box fourcorners"></canvas>
     </div>
-</template>
-
-<template name="control">
-  <div class="title">contorl</div>
-  <div class="control">
-      <button id="reset">reset</button>
-  </div>
 </template>
