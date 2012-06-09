@@ -1,112 +1,98 @@
 Vectors = new Meteor.Collection("vectors");
-//Vectors.remove({});
 if (Meteor.is_client) {
-    //
-    // Board
-    //
-    var Board = {
-        draw: false,
-        startX: null,
-        startY: null,
-        endX: null,
-        endY: null,
-        context:null, 
-        rect:null,
+    // ShareBoard //
+    var ShareBoard = {
+        _draw: false,
+        _startX: null,
+        _startY: null,
+        _endX: null,
+        _endY: null,
+        _context:null, 
+        _rect:null,
         load: function(id) {
-            this.canvas = document.getElementById(id);
-            this.canvas.width = 320;
-            this.canvas.height = 480;
-            this.context = canvas.getContext('2d');
-            this.rect =  canvas.getBoundingClientRect(); 
+            this._canvas = document.getElementById(id);
+            this._canvas.width = this._canvas.clientWidth;
+            this._canvas.height = this._canvas.clientHeight;
+            this._context = this._canvas.getContext('2d');
+            this._rect =  this._canvas.getBoundingClientRect(); 
         },
         paint : function (vector) {
-            this.context.lineWidth = 5;
-            this.context.strokeStyle = 'white';
-            this.context.beginPath();
-            this.context.moveTo(vector.startX - this.rect.left, vector.startY-this.rect.top);
-            this.context.lineTo(vector.endX - this.rect.left, vector.endY-this.rect.top);
-            this.context.stroke();
-            this.context.save();
+            this._context.lineWidth = vector.lineWidth;
+            this._context.strokeStyle = vector.strokeStyle;
+            this._context.beginPath();
+            this._context.moveTo(vector.startX - this._rect.left, vector.startY-this._rect.top);
+            this._context.lineTo(vector.endX - this._rect.left, vector.endY-this._rect.top);
+            this._context.stroke();
+            this._context.save();
         },
         clear : function () {
-            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
         },
         start: function(x,y) {
-            this.startX = x;
-            this.startY = y;
-            this.draw = true;
+            this._startX = x;
+            this._startY = y;
+            this._draw = true;
         },
         end: function(x,y) {
-            this.endX = x;
-            this.endY = y;
-            this.draw = false;
+            this._endX = x;
+            this._endY = y;
+            this._draw = false;
         },
-        save: function(id,x,y) {
-            this.endX = x;
-            this.endY = y;
-            if (this.draw) {
+        move: function(id,x,y) {
+            this._endX = x;
+            this._endY = y;
+            if (this._draw) {
                 Vectors.insert({
                     user_id : id
-                     , startX : this.startX
-                     , startY : this.startY
-                     , endX : this.endX
-                     , endY : this.endY
+                     , startX : this._startX
+                     , startY : this._startY
+                     , endX : this._endX
+                     , endY : this._endY
+                     , lineWidth : 5
+                     , strokeStyle :'white'
                      , created : new Date()
                 });
-                this.startX = this.endX;
-                this.startY = this.endY;
+                this._startX = this._endX;
+                this._startY = this._endY;
             }
         }
     }
-    //
-    // dara trigger
-    //
+    // Data Trigger //
     var cursor = Vectors.find({});
     var handle = cursor.observe({
         added: function (vector) { 
-            Board.paint(vector);
+            ShareBoard.paint(vector);
         },
         removed: function (vector) {
-            Board.clear(); 
+            ShareBoard.clear(); 
         } 
     });
-    //
-    // canvas event
-    //
-    Template.draw.events = {
-        'mousedown canvas' : function (ev) {
-            if (!ev) ev = event;
-            Board.start(ev.pageX, ev.pageY);
+    
+    // Board Event //
+    Template.board.events = {
+        'touchstart #board, mousedown #board' : function (ev) {
+            if (!ev) ev = event; //4ff
+            if ( (ev.touches) && (ev.touches.length >= 3)) Vectors.remove({});
+            ShareBoard.start(ev.pageX, ev.pageY);
         },
-        'dblclick canvas' : function (ev) {
-            Vectors.remove({});
-        },
-        'mousemove canvas' : function (ev) {
-            if (!ev) ev = event;
+        'touchmove #board, mousemove #board' : function (ev) {
+            if (!ev) ev = event; //4ff
             ev.preventDefault();
-            Board.save(this._id, ev.pageX,  ev.pageY);
+            ShareBoard.move(this._id, ev.pageX,  ev.pageY);
         },
-        'mouseup canvas' : function (ev) {
-            if (!ev) ev = event;
-            Board.end(ev.pageX,  ev.pageY);
+        'touchend #board, mouseup #board' : function (ev) {
+            if (!ev) ev = event; //4ff
+            ShareBoard.end(ev.pageX,  ev.pageY);
         },
-        'touchstart canvas' : function (ev) {
-            if (!ev) ev = event;
-            //three point clear
-            if ( (ev.touches) && (ev.touches.length > 1)) Vectors.remove({});
-            Board.start(ev.pageX, ev.pageY);
-        },
-        'touchmove canvas' : function (ev) {
-            if (!ev) ev = event;
-            ev.preventDefault();
-            Board.save(this._id, ev.pageX,  ev.pageY);
-        },
-        'touchend canvas' : function (ev) {
-            if (!ev) ev = event;
-            Board.end(ev.pageX,  ev.pageY);
+        'dblclick #board' : function (ev) {
+            if (!ev) ev = event; //4ff
+             if (ev.shiftKey) Vectors.remove({});
         }
-   } 
+    } 
+   //
+   // Client Startup
+   //   
    Meteor.startup(function () {
-       Board.load("canvas");
+       ShareBoard.load("board");
    });
 }

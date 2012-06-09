@@ -1,11 +1,8 @@
-/* CSS declarations go here */
 body {  
     margin: 0 auto;  
 }  
-.box{
-  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#006600), to(#006600), color-stop(1,#006600));
-}
-#canvas {
+#board {
     width: 320px;  
     height: 480px;
+    background-color: #006600;
 }

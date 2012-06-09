@@ -6,12 +6,9 @@
 </head>
 
 <body>
-    <div id="wrapper"> 
-            {{> draw}}
-    </div>
+    {{> board}}
 </body>
-<template name="draw">
-  <div id="draw">
-      <canvas id="canvas" class="box fourcorners"></canvas>
-    </div>
+
+<template name="board">
+    <canvas id="board"></canvas>
 </template>
