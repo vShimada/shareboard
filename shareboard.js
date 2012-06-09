@@ -11,8 +11,13 @@ if (Meteor.is_client) {
         _rect:null,
         load: function(id) {
             this._canvas = document.getElementById(id);
+            
             this._canvas.width = this._canvas.clientWidth;
             this._canvas.height = this._canvas.clientHeight;
+            
+            console.log("width="+this._canvas.width+ ":" + this._canvas.clientWidth);
+            console.log("height="+this._canvas.height + ":" + this._canvas.clientHeight);
+            
             this._context = this._canvas.getContext('2d');
             this._rect =  this._canvas.getBoundingClientRect(); 
         },
