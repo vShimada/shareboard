@@ -1,6 +1,8 @@
 Vectors = new Meteor.Collection("vectors");
 if (Meteor.is_client) {
-    // ShareBoard //
+    //
+    // ShareBoard
+    //   
     var ShareBoard = {
         _draw: false,
         _startX: null,
@@ -9,17 +11,23 @@ if (Meteor.is_client) {
         _endY: null,
         _context:null, 
         _rect:null,
+        _handle:null,
         load: function(id) {
             this._canvas = document.getElementById(id);
-            
             this._canvas.width = this._canvas.clientWidth;
             this._canvas.height = this._canvas.clientHeight;
-            
-            console.log("width="+this._canvas.width+ ":" + this._canvas.clientWidth);
-            console.log("height="+this._canvas.height + ":" + this._canvas.clientHeight);
-            
             this._context = this._canvas.getContext('2d');
             this._rect =  this._canvas.getBoundingClientRect(); 
+            // Data Trigger //
+            this._handle = Vectors.find({}).observe({
+                added: function (vector) { 
+                    ShareBoard.paint(vector);
+                    ShareBoard.text(this.results.length);
+                },
+                removed: function (vector) {
+                    ShareBoard.unpaint(); 
+                } 
+            });
         },
         paint : function (vector) {
             this._context.lineWidth = vector.lineWidth;
@@ -30,8 +38,14 @@ if (Meteor.is_client) {
             this._context.stroke();
             this._context.save();
         },
-        clear : function () {
+        unpaint : function () {
             this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+        },
+        text : function (text) {
+             this._context.fillStyle = "white";
+             this._context.font = 'italic 400 12px/2 Unknown Font, sans-serif';
+             this._context.clearRect(0, 0, this._canvas.width,11);
+             this._context.fillText(text, 10,10);
         },
         start: function(x,y) {
             this._startX = x;
@@ -60,38 +74,39 @@ if (Meteor.is_client) {
                 this._startX = this._endX;
                 this._startY = this._endY;
             }
+        },
+        clear: function () {
+            Vectors.remove({});
         }
     }
-    // Data Trigger //
-    var cursor = Vectors.find({});
-    var handle = cursor.observe({
-        added: function (vector) { 
-            ShareBoard.paint(vector);
-        },
-        removed: function (vector) {
-            ShareBoard.clear(); 
-        } 
-    });
     
-    // Board Event //
+    //
+    // Board Event
+    //   
     Template.board.events = {
         'touchstart #board, mousedown #board' : function (ev) {
-            if (!ev) ev = event; //4ff
-            if ( (ev.touches) && (ev.touches.length >= 3)) Vectors.remove({});
-            ShareBoard.start(ev.pageX, ev.pageY);
+            var ev = ev || window.event; //4ff
+            var x = (ev.touches) ? ev.touches[0].pageX : ev.pageX; 
+            var y = (ev.touches) ? ev.touches[0].pageY : ev.pageY;
+            if ( (ev.touches) && (ev.touches.length >= 3)) ShareBoard.clear();
+            ShareBoard.start(x, y);
         },
         'touchmove #board, mousemove #board' : function (ev) {
-            if (!ev) ev = event; //4ff
+            var ev = ev || window.event; //4ff
+            var x = (ev.touches) ? ev.touches[0].pageX : ev.pageX; 
+            var y = (ev.touches) ? ev.touches[0].pageY : ev.pageY;
             ev.preventDefault();
-            ShareBoard.move(this._id, ev.pageX,  ev.pageY);
+            ShareBoard.move(this._id, x,  y);
         },
         'touchend #board, mouseup #board' : function (ev) {
-            if (!ev) ev = event; //4ff
-            ShareBoard.end(ev.pageX,  ev.pageY);
+            var ev = ev || window.event; //4ff
+            var x = (ev.touches) ? ev.touches[0].pageX : ev.pageX; 
+            var y = (ev.touches) ? ev.touches[0].pageY : ev.pageY;
+            ShareBoard.end(x,  y);
         },
         'dblclick #board' : function (ev) {
-            if (!ev) ev = event; //4ff
-             if (ev.shiftKey) Vectors.remove({});
+            var ev = ev || window.event; //4ff
+             if (ev.shiftKey) ShareBoard.clear();
         }
     } 
    //
