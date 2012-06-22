@@ -9,6 +9,7 @@ if (Meteor.is_client) {
         _startY: null,
         _endX: null,
         _endY: null,
+        _touch_time: null,
         _context:null, 
         _rect:null,
         _handle:null,
@@ -22,7 +23,7 @@ if (Meteor.is_client) {
             this._handle = Vectors.find({}).observe({
                 added: function (vector) { 
                     ShareBoard.paint(vector);
-                    ShareBoard.text(this.results.length);
+                    ShareBoard.textTop(this.results.length+" record ");
                 },
                 removed: function (vector) {
                     ShareBoard.unpaint(); 
@@ -41,16 +42,23 @@ if (Meteor.is_client) {
         unpaint : function () {
             this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
         },
-        text : function (text) {
+        textTop : function (text) {
              this._context.fillStyle = "white";
              this._context.font = 'italic 400 12px/2 Unknown Font, sans-serif';
              this._context.clearRect(0, 0, this._canvas.width,11);
              this._context.fillText(text, 10,10);
         },
+        textButtom : function (text) {
+             this._context.fillStyle = "white";
+             this._context.font = 'italic 400 12px/2 Unknown Font, sans-serif';
+             this._context.clearRect(0, this._canvas.height-20, this._canvas.width,this._canvas.height);
+             this._context.fillText(text, 10, this._canvas.height-11);
+        },
         start: function(x,y) {
             this._startX = x;
             this._startY = y;
             this._draw = true;
+            this._touch_time = parseInt( new Date() /1);
         },
         end: function(x,y) {
             this._endX = x;
@@ -60,6 +68,7 @@ if (Meteor.is_client) {
         move: function(id,x,y) {
             this._endX = x;
             this._endY = y;
+            this._touch_time = parseInt( new Date() /1);
             if (this._draw) {
                 Vectors.insert({
                     user_id : id
@@ -77,6 +86,14 @@ if (Meteor.is_client) {
         },
         clear: function () {
             Vectors.remove({});
+        },
+        isLong: function() {
+            var time = parseInt( new Date() /1 );
+            if (( time - this._touch_time )>1000) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
     
@@ -85,28 +102,40 @@ if (Meteor.is_client) {
     //   
     Template.board.events = {
         'touchstart #board, mousedown #board' : function (ev) {
-            var ev = ev || window.event; //4ff
-            var x = (ev.touches) ? ev.touches[0].pageX : ev.pageX; 
-            var y = (ev.touches) ? ev.touches[0].pageY : ev.pageY;
-            if ( (ev.touches) && (ev.touches.length >= 3)) ShareBoard.clear();
-            ShareBoard.start(x, y);
+            try {
+                var ev = ev || window.event; //4ff
+                ev.preventDefault();
+                var x = (ev.changedTouches) ? ev.changedTouches[0].pageX : ev.pageX; 
+                var y = (ev.changedTouches) ? ev.changedTouches[0].pageY : ev.pageY;
+                ShareBoard.start(x, y);
+            } catch (e){
+                ShareBoard.textButtom("touch start error:" + e);
+            }    
         },
         'touchmove #board, mousemove #board' : function (ev) {
-            var ev = ev || window.event; //4ff
-            var x = (ev.touches) ? ev.touches[0].pageX : ev.pageX; 
-            var y = (ev.touches) ? ev.touches[0].pageY : ev.pageY;
-            ev.preventDefault();
-            ShareBoard.move(this._id, x,  y);
+            try {
+                var ev = ev || window.event; //4ff
+                ev.preventDefault();
+                var x = (ev.changedTouches) ? ev.changedTouches[0].pageX : ev.pageX; 
+                var y = (ev.changedTouches) ? ev.changedTouches[0].pageY : ev.pageY;
+                ShareBoard.move(this._id, x,  y);
+            } catch (e){
+                ShareBoard.textButtom("touch move error:" + e);
+            }    
         },
         'touchend #board, mouseup #board' : function (ev) {
-            var ev = ev || window.event; //4ff
-            var x = (ev.touches) ? ev.touches[0].pageX : ev.pageX; 
-            var y = (ev.touches) ? ev.touches[0].pageY : ev.pageY;
-            ShareBoard.end(x,  y);
-        },
-        'dblclick #board' : function (ev) {
-            var ev = ev || window.event; //4ff
-             if (ev.shiftKey) ShareBoard.clear();
+            try {
+                var ev = ev || window.event; //4ff
+                var x = (ev.changedTouches) ? ev.changedTouches[0].pageX : ev.pageX; 
+                var y = (ev.changedTouches) ? ev.changedTouches[0].pageY : ev.pageY;
+                ShareBoard.end(x,  y);
+                if (ShareBoard.isLong())  {
+                    ShareBoard.clear();
+                    ShareBoard.textButtom(" long touch clear canvas");
+                }
+            } catch (e){
+                ShareBoard.textButtom("touch end error:" + e);
+            }    
         }
     } 
    //
