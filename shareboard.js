@@ -162,7 +162,8 @@ if (Meteor.is_client) {
                 ShareBoard.textButtom("dbl tap error:" + e);
             }    
         }
-    } 
+    }
+ 
    //
    // Client Startup
    //   
