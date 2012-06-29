@@ -1,4 +1,6 @@
 Vectors = new Meteor.Collection("vectors");
+Session.set('mode','1');
+
 if (Meteor.is_client) {
     //
     // ShareBoard
@@ -68,6 +70,14 @@ if (Meteor.is_client) {
         move: function(id,x,y) {
             this._endX = x;
             this._endY = y;
+            this._endY = y;
+            var style = 'white';
+            var lineWidth = 5;
+            if (Session.get('mode') == 2) {
+             style = '#006600';
+             lineWidth = 20;
+            }
+
             this._touch_time = parseInt( new Date() /1);
             if (this._draw) {
                 Vectors.insert({
@@ -76,8 +86,8 @@ if (Meteor.is_client) {
                      , startY : this._startY
                      , endX : this._endX
                      , endY : this._endY
-                     , lineWidth : 5
-                     , strokeStyle :'white'
+                     , lineWidth : lineWidth
+                     , strokeStyle : style
                      , created : new Date()
                 });
                 this._startX = this._endX;
@@ -93,6 +103,13 @@ if (Meteor.is_client) {
                 return true;
             } else {
                 return false;
+            }
+        },
+        modeChange: function () {
+            if (Session.get('mode') == 1) {
+                Session.set('mode','2');
+            } else {
+                Session.set('mode','1');
             }
         }
     }
@@ -135,6 +152,14 @@ if (Meteor.is_client) {
                 }
             } catch (e){
                 ShareBoard.textButtom("touch end error:" + e);
+            }    
+        },
+        'dblTap #board, dblclick #board' : function (ev) {
+            try {
+                ShareBoard.modeChange();
+                ShareBoard.textButtom(" mode changed");
+            } catch (e){
+                ShareBoard.textButtom("dbl tap error:" + e);
             }    
         }
     } 
